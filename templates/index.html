@@ -1,12 +1,21 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Ocean Unlink Mail — Roblox COPPA Tool</title>
+  <title>Unlink Mail — Roblox 3TN HUB</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+.btn-discord {
+  border-color: rgba(56, 189, 248, 0.35);
+  color: var(--sky);
+  white-space: nowrap;
+}
+.btn-discord:hover {
+  background: rgba(14, 165, 233, 0.16);
+  border-color: var(--sky);
+}
     :root {
       --bg-deep: #041322;
       --bg-ocean: #071e36;
@@ -308,6 +317,9 @@
 <body>
   <div class="wrap">
     <header class="topbar">
+    <button type="button" class="btn-ghost btn-discord" id="btnCopyDiscord" data-discord="https://discord.gg/SsEvgfavE2">
+  Copy Discord
+</button>
       <div class="title-group">
         <span class="badge">OCEAN UNLINK</span>
         <h1>ROBLOX UNLINK MAIL (&lt;13 DOB)</h1>
@@ -391,6 +403,24 @@
   </div>
 
   <script>
+const btnCopyDiscord = document.getElementById('btnCopyDiscord');
+btnCopyDiscord.addEventListener('click', async () => {
+  const link = btnCopyDiscord.dataset.discord || '';
+  if (!link) return;
+  try {
+    await navigator.clipboard.writeText(link);
+  } catch {
+    const tmp = document.createElement('textarea');
+    tmp.value = link;
+    document.body.appendChild(tmp);
+    tmp.select();
+    document.execCommand('copy');
+    tmp.remove();
+  }
+  const prev = btnCopyDiscord.textContent;
+  btnCopyDiscord.textContent = 'Copied Discord!';
+  setTimeout(() => (btnCopyDiscord.textContent = prev), 1400);
+});
     const txtAcc = document.getElementById('txtAcc');
     const txtProxy = document.getElementById('txtProxy');
     const outOk = document.getElementById('outOk');
@@ -527,4 +557,4 @@
     });
   </script>
 </body>
-  </html>
+</html>
