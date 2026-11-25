@@ -2,32 +2,22 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Unlink Mail — Roblox 3TN HUB Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UnlinkMail — Roblox Birthday &amp; Chef Solver</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-.btn-discord {
-  border-color: rgba(56, 189, 248, 0.35);
-  color: var(--sky);
-  white-space: nowrap;
-}
-.btn-discord:hover {
-  background: rgba(14, 165, 233, 0.16);
-  border-color: var(--sky);
-}
     :root {
-      --bg-deep: #041322;
-      --bg-ocean: #071e36;
-      --card: rgba(8, 31, 56, 0.82);
-      --input: #051629;
-      --border: rgba(56, 189, 248, 0.22);
-      --border-active: rgba(14, 165, 233, 0.72);
+      --bg-dark: #051120;
+      --bg-mid: #081e36;
+      --card: rgba(9, 32, 58, 0.84);
+      --input: #051528;
+      --line: rgba(56, 189, 248, 0.24);
+      --line-hi: rgba(56, 189, 248, 0.72);
       --sky: #38bdf8;
-      --ocean: #0284c7;
-      --cyan: #06b6d4;
-      --ok: #22c55e;
-      --warn: #facc15;
+      --blue: #0284c7;
+      --cyan: #22d3ee;
+      --ok: #34d399;
       --err: #f87171;
       --text: #e0f2fe;
       --muted: #7dd3fc;
@@ -40,111 +30,120 @@
       color: var(--text);
       min-height: 100vh;
       background:
-        radial-gradient(circle at 12% 10%, rgba(14, 165, 233, 0.24), transparent 38%),
-        radial-gradient(circle at 88% 85%, rgba(6, 182, 212, 0.18), transparent 40%),
-        linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-ocean) 100%);
-      padding: 16px;
+        radial-gradient(circle at 14% 12%, rgba(14, 165, 233, 0.22), transparent 36%),
+        radial-gradient(circle at 86% 85%, rgba(34, 211, 238, 0.16), transparent 40%),
+        linear-gradient(155deg, var(--bg-dark) 0%, var(--bg-mid) 100%);
+      padding: 14px;
     }
 
     @media (min-width: 768px) {
-      body { padding: 26px; }
+      body { padding: 24px; }
     }
 
-    .wrap {
+    .app {
       max-width: 1320px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 16px;
     }
 
-    .topbar {
+    header {
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       border-radius: 16px;
       padding: 16px 20px;
-      backdrop-filter: blur(14px);
+      backdrop-filter: blur(12px);
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 14px;
-    }
-
-    .title-group {
-      display: flex;
-      align-items: center;
       gap: 12px;
     }
 
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     .badge {
-      background: linear-gradient(135deg, var(--ocean), var(--cyan));
-      color: #fff;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      color: #031322;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.8px;
-      padding: 5px 10px;
-      border-radius: 8px;
+      padding: 4px 10px;
+      border-radius: 7px;
       text-transform: uppercase;
     }
 
     h1 {
-      font-size: clamp(16px, 2.4vw, 22px);
+      font-size: clamp(16px, 2.3vw, 21px);
       font-weight: 700;
       color: #f0f9ff;
+    }
+
+    .top-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    @media (min-width: 920px) {
+      .top-controls { width: auto; }
     }
 
     .stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      width: 100%;
-    }
-
-    @media (min-width: 768px) {
-      .stats { width: auto; display: flex; gap: 10px; }
+      flex: 1;
     }
 
     .stat {
       background: var(--input);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 12px;
+      padding: 7px 12px;
+      font-size: 11.5px;
       font-weight: 600;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
     }
 
     .stat span { font-family: 'JetBrains Mono', monospace; font-size: 14px; }
-    .s-tot span { color: var(--sky); }
-    .s-ok span { color: var(--ok); }
-    .s-fail span { color: var(--err); }
+    .st-t span { color: var(--cyan); }
+    .st-o span { color: var(--ok); }
+    .st-f span { color: var(--err); }
 
-    .layout {
+    .grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 18px;
+      gap: 16px;
     }
 
     @media (min-width: 1024px) {
-      .layout { grid-template-columns: 1fr 1fr; }
+      .grid { grid-template-columns: 1fr 1fr; }
     }
 
-    .panel {
+    .card {
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       border-radius: 16px;
       padding: 18px;
-      backdrop-filter: blur(14px);
+      backdrop-filter: blur(12px);
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
 
-    .panel-head {
+    .card-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -152,18 +151,12 @@
       flex-wrap: wrap;
     }
 
-    .panel-title {
-      font-size: 13px;
+    .card-title {
+      font-size: 12.5px;
       font-weight: 700;
-      text-transform: uppercase;
       letter-spacing: 0.7px;
-      color: var(--sky);
-    }
-
-    .meta-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      text-transform: uppercase;
+      color: var(--muted);
     }
 
     .pill {
@@ -171,7 +164,7 @@
       font-size: 11.5px;
       color: var(--muted);
       background: var(--input);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       padding: 3px 9px;
       border-radius: 999px;
     }
@@ -179,7 +172,7 @@
     textarea {
       width: 100%;
       background: var(--input);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       border-radius: 12px;
       color: #f0f9ff;
       font-family: 'JetBrains Mono', monospace;
@@ -192,13 +185,13 @@
     }
 
     textarea:focus {
-      border-color: var(--border-active);
-      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18);
+      border-color: var(--line-hi);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.16);
     }
 
     .opts {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 10px;
     }
 
@@ -213,24 +206,24 @@
     }
 
     .field label {
-      font-size: 11.5px;
+      font-size: 12px;
       color: var(--muted);
       font-weight: 500;
     }
 
-    input[type="number"] {
+    select, input[type="number"] {
       width: 100%;
       background: var(--input);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       border-radius: 10px;
       color: #fff;
-      font-family: 'JetBrains Mono', monospace;
       font-size: 13px;
       padding: 9px 11px;
       outline: none;
     }
 
-    input[type="number"]:focus { border-color: var(--border-active); }
+    input[type="number"] { font-family: 'JetBrains Mono', monospace; }
+    select:focus, input[type="number"]:focus { border-color: var(--line-hi); }
 
     .actions {
       display: flex;
@@ -238,7 +231,7 @@
       gap: 10px;
     }
 
-    button, .file-btn {
+    button, .upload-btn {
       cursor: pointer;
       border: none;
       border-radius: 10px;
@@ -246,60 +239,71 @@
       font-weight: 600;
       font-size: 13px;
       padding: 10px 15px;
+      min-height: 40px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
       transition: all 0.18s ease;
-      min-height: 40px;
     }
 
-    .btn-run {
-      background: linear-gradient(135deg, var(--ocean), var(--cyan));
-      color: #fff;
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      color: #031322;
       flex: 1 1 180px;
-      box-shadow: 0 4px 18px rgba(2, 132, 199, 0.35);
     }
 
-    .btn-run:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
-    .btn-run:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary:hover:not(:disabled) { filter: brightness(1.07); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
 
-    .btn-ghost, .file-btn {
+    .btn-sec, .upload-btn {
       background: var(--input);
       color: var(--text);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
     }
 
-    .btn-ghost:hover, .file-btn:hover { border-color: var(--sky); }
+    .btn-sec:hover, .upload-btn:hover { border-color: var(--sky); }
+
+    .btn-discord {
+      background: rgba(14, 165, 233, 0.16);
+      color: var(--muted);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      white-space: nowrap;
+    }
+
+    .btn-discord:hover {
+      background: rgba(14, 165, 233, 0.28);
+      border-color: var(--cyan);
+    }
 
     .btn-dl {
-      background: rgba(34, 197, 94, 0.14);
-      color: #86efac;
-      border: 1px solid rgba(34, 197, 94, 0.35);
+      background: rgba(52, 211, 153, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(52, 211, 153, 0.35);
     }
 
-    .btn-dl:hover { background: rgba(34, 197, 94, 0.24); }
+    .btn-dl:hover { background: rgba(52, 211, 153, 0.25); }
 
-    .progress {
+    .bar {
       width: 100%;
-      height: 7px;
+      height: 6px;
       background: var(--input);
       border-radius: 999px;
       overflow: hidden;
     }
 
-    .progress-fill {
+    .bar-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, var(--ocean), var(--sky), var(--cyan));
-      transition: width 0.25s ease;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+      transition: width 0.22s ease;
     }
 
-    .log-box {
-      background: #030e1a;
-      border: 1px solid var(--border);
+    .log {
+      background: #030d18;
+      border: 1px solid var(--line);
       border-radius: 12px;
-      height: 170px;
+      height: 165px;
       overflow-y: auto;
       padding: 10px 12px;
       font-family: 'JetBrains Mono', monospace;
@@ -308,207 +312,208 @@
     }
 
     .t { color: #38bdf8; opacity: 0.75; }
-    .m-INFO { color: #e0f2fe; }
-    .m-STEP { color: #7dd3fc; }
-    .m-WARN { color: var(--warn); }
-    .m-ERR  { color: var(--err); }
+    .ok { color: var(--ok); }
+    .err { color: var(--err); }
+    .info { color: #bae6fd; }
+    .step { color: #7dd3fc; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="topbar">
-    <button type="button" class="btn-ghost btn-discord" id="btnCopyDiscord" data-discord="https://discord.gg/vVUz3rJzmK">
-  Copy Discord
-</button>
-      <div class="title-group">
-        <span class="badge">OCEAN UNLINK</span>
-        <h1>ROBLOX UNLINK MAIL (&lt;13 DOB)</h1>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <span class="badge">UNLINKMAIL</span>
+        <h1>ROBLOX BIRTHDAY &amp; CHEF SOLVER</h1>
       </div>
-      <div class="stats">
-        <div class="stat s-tot">TOTAL <span id="stTotal">0</span></div>
-        <div class="stat s-ok">SUCCESS <span id="stOk">0</span></div>
-        <div class="stat s-fail">FAILED <span id="stFail">0</span></div>
+
+      <div class="top-controls">
+        <div class="stats">
+          <div class="stat st-t">TOTAL <span id="stTotal">0</span></div>
+          <div class="stat st-o">OK <span id="stOk">0</span></div>
+          <div class="stat st-f">FAIL <span id="stFail">0</span></div>
+        </div>
+        <button type="button" class="btn-discord" id="btnCopyDiscord" data-discord="https://discord.gg/vVUz3rJzmK">
+          Copy Discord 3TN HUB
+        </button>
       </div>
     </header>
 
-    <div class="layout">
-      <section class="panel">
-        <div class="panel-head">
-          <span class="panel-title">Accounts (user:pass:cookie)</span>
-          <div class="meta-actions">
-            <span class="pill" id="cntAcc">0 accs</span>
-            <label class="file-btn" style="padding:5px 10px; min-height:auto; font-size:11.5px;">
+    <div class="grid">
+      <section class="card">
+        <div class="card-head">
+          <span class="card-title">Accounts (username:password:cookie)</span>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span class="pill" id="pAcc">0 accs</span>
+            <label class="file-upload" style="padding:4px 10px; min-height:auto; font-size:11.5px;">
               Import .txt
-              <input type="file" id="fileAcc" accept=".txt" hidden />
+              <input type="file" id="fAcc" accept=".txt" hidden />
             </label>
           </div>
         </div>
-        <textarea id="txtAcc" rows="7" placeholder="username:password:_|WARNING:-DO-NOT-SHARE-THIS..."></textarea>
+        <textarea id="inAcc" rows="7" placeholder="player1:MyPass123:_|WARNING:-DO-NOT-SHARE-THIS..."></textarea>
 
-        <div class="panel-head">
-          <span class="panel-title">Proxies (tùy chọn — user:pass@host:port hoặc host:port)</span>
-          <span class="pill" id="cntProxy">0 proxies</span>
+        <div class="card-head">
+          <span class="card-title">Proxies (tùy chọn — user:pass@host:port hoặc host:port)</span>
+          <span class="pill" id="pProxy">0 proxies</span>
         </div>
-        <textarea id="txtProxy" rows="4" placeholder="user:pass@1.2.3.4:8080&#10;1.2.3.4:8080:user:pass"></textarea>
+        <textarea id="inProxy" rows="3" placeholder="user:pass@1.2.3.4:8080&#10;1.2.3.4:8080:user:pass"></textarea>
 
         <div class="opts">
           <div class="field">
-            <label>Threads (1–30)</label>
-            <input type="number" id="inpThreads" value="5" min="1" max="30" />
+            <label for="selDobMode">Chế độ ngày sinh</label>
+            <select id="selDobMode">
+              <option value="unlink13">Under 13 (Unlink Mail / COPPA)</option>
+              <option value="adult18">Random 18+ (18 - 30 tuổi)</option>
+            </select>
           </div>
           <div class="field">
-            <label>Retries (0–5)</label>
-            <input type="number" id="inpRetries" value="2" min="0" max="5" />
-          </div>
-          <div class="field">
-            <label>Retry Delay (s)</label>
-            <input type="number" id="inpDelay" value="2" min="0" max="15" />
+            <label for="inpThreads">Threads (1 - 20)</label>
+            <input type="number" id="inpThreads" value="5" min="1" max="20" />
           </div>
         </div>
 
         <div class="actions">
-          <button class="btn-run" id="btnRun">START UNLINK MAIL</button>
-          <button class="btn-ghost" id="btnClear">Clear</button>
+          <button type="button" class="btn-primary" id="btnStart">START UNLINKMAIL</button>
+          <button type="button" class="btn-sec" id="btnClear">Clear</button>
         </div>
       </section>
 
-      <section class="panel">
-        <div class="panel-head">
-          <span class="panel-title" style="color:#86efac;">Unlink Success (user:pass:cookie)</span>
-          <span class="pill" id="cntOk">0 accs</span>
+      <section class="card">
+        <div class="card-head">
+          <span class="card-title" style="color:#6ee7b7;">Success Output (user:pass:cookie)</span>
+          <span class="pill" id="pOk">0 accs</span>
         </div>
-        <textarea id="outOk" rows="6" readonly placeholder="Danh sách account unlink mail thành công..."></textarea>
+        <textarea id="outOk" rows="6" readonly placeholder="Danh sách thành công sẽ hiện tại đây..."></textarea>
 
         <div class="actions">
-          <button class="btn-dl" id="btnDlOk">Download Success .txt</button>
-          <button class="btn-ghost" id="btnCopyOk">Copy</button>
-          <button class="btn-ghost" id="btnDlFail">Download Failed .txt</button>
+          <button type="button" class="btn-dl" id="btnDlOk">Download .txt</button>
+          <button type="button" class="btn-sec" id="btnCopyOk">Copy Output</button>
+          <button type="button" class="btn-sec" id="btnDlFail">Download Failed</button>
         </div>
 
-        <div class="panel-head">
-          <span class="panel-title" style="color:#fca5a5;">Failed / Dead</span>
-          <span class="pill" id="cntFail">0 accs</span>
+        <div class="card-head">
+          <span class="card-title" style="color:#fca5a5;">Failed</span>
+          <span class="pill" id="pFail">0 accs</span>
         </div>
-        <textarea id="outFail" rows="3" readonly placeholder="Account lỗi hoặc cookie chết..."></textarea>
+        <textarea id="outFail" rows="3" readonly placeholder="Account lỗi hoặc 2SV sai pass..."></textarea>
 
-        <div class="progress">
-          <div class="progress-fill" id="progBar"></div>
+        <div class="bar">
+          <div class="bar-fill" id="barFill"></div>
         </div>
 
-        <div class="log-box" id="logBox">
-          <div><span class="t">[READY]</span> <span class="m-STEP">Ocean Unlink Mail sẵn sàng trên Mobile &amp; PC.</span></div>
+        <div class="log" id="logBox">
+          <div><span class="t">[READY]</span> <span class="step">UnlinkMail sẵn sàng trên PC &amp; Mobile.</span></div>
         </div>
       </section>
     </div>
   </div>
 
   <script>
-const btnCopyDiscord = document.getElementById('btnCopyDiscord');
-btnCopyDiscord.addEventListener('click', async () => {
-  const link = btnCopyDiscord.dataset.discord || '';
-  if (!link) return;
-  try {
-    await navigator.clipboard.writeText(link);
-  } catch {
-    const tmp = document.createElement('textarea');
-    tmp.value = link;
-    document.body.appendChild(tmp);
-    tmp.select();
-    document.execCommand('copy');
-    tmp.remove();
-  }
-  const prev = btnCopyDiscord.textContent;
-  btnCopyDiscord.textContent = 'Copied Discord!';
-  setTimeout(() => (btnCopyDiscord.textContent = prev), 1400);
-});
-    const txtAcc = document.getElementById('txtAcc');
-    const txtProxy = document.getElementById('txtProxy');
+    const inAcc = document.getElementById('inAcc');
+    const inProxy = document.getElementById('inProxy');
     const outOk = document.getElementById('outOk');
     const outFail = document.getElementById('outFail');
     const logBox = document.getElementById('logBox');
-    const btnRun = document.getElementById('btnRun');
+    const btnStart = document.getElementById('btnStart');
 
-    function updateCounts() {
-      const accs = txtAcc.value.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#') && l.split(':').length >= 3).length;
-      const prxs = txtProxy.value.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).length;
-      document.getElementById('cntAcc').textContent = `${accs} accs`;
-      document.getElementById('cntProxy').textContent = `${prxs} proxies`;
+    function syncCounts() {
+      const a = inAcc.value.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#') && l.split(':').length >= 3).length;
+      const p = inProxy.value.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).length;
+      document.getElementById('pAcc').textContent = `${a} accs`;
+      document.getElementById('pProxy').textContent = `${p} proxies`;
     }
 
-    txtAcc.addEventListener('input', updateCounts);
-    txtProxy.addEventListener('input', updateCounts);
+    inAcc.addEventListener('input', syncCounts);
+    inProxy.addEventListener('input', syncCounts);
 
-    document.getElementById('fileAcc').addEventListener('change', (e) => {
-      const f = e.target.files[0];
-      if (!f) return;
-      const r = new FileReader();
-      r.onload = (ev) => { txtAcc.value = ev.target.result; updateCounts(); };
-      r.readAsText(f);
+    document.getElementById('fAcc').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => { inAcc.value = ev.target.result; syncCounts(); };
+      reader.readAsText(file);
     });
 
     document.getElementById('btnClear').addEventListener('click', () => {
-      txtAcc.value = '';
-      updateCounts();
+      inAcc.value = '';
+      syncCounts();
     });
 
-    function addLog(t, msg, level = 'INFO') {
-      const row = document.createElement('div');
-      row.innerHTML = `<span class="t">[${t}]</span> <span class="m-${level}">${msg}</span>`;
-      logBox.appendChild(row);
-      logBox.scrollTop = logBox.scrollHeight;
+    async function copyText(text, btn, doneLabel = 'Copied!') {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+      const prev = btn.textContent;
+      btn.textContent = doneLabel;
+      setTimeout(() => (btn.textContent = prev), 1400);
     }
 
-    function saveFile(name, text) {
-      if (!text.trim()) return;
-      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const btnCopyDiscord = document.getElementById('btnCopyDiscord');
+    btnCopyDiscord.addEventListener('click', () => {
+      copyText(btnCopyDiscord.dataset.discord || '', btnCopyDiscord, 'Copied Discord!');
+    });
+
+    document.getElementById('btnCopyOk').addEventListener('click', function () {
+      copyText(outOk.value, this, 'Copied!');
+    });
+
+    function downloadTxt(filename, content) {
+      if (!content.trim()) return;
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = name;
+      a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
     }
 
-    document.getElementById('btnDlOk').addEventListener('click', () => saveFile('unmail_success.txt', outOk.value));
-    document.getElementById('btnDlFail').addEventListener('click', () => saveFile('unmail_failed.txt', outFail.value));
+    document.getElementById('btnDlOk').addEventListener('click', () => downloadTxt('unlinkmail_success.txt', outOk.value));
+    document.getElementById('btnDlFail').addEventListener('click', () => downloadTxt('unlinkmail_failed.txt', outFail.value));
 
-    document.getElementById('btnCopyOk').addEventListener('click', () => {
-      if (!outOk.value.trim()) return;
-      navigator.clipboard.writeText(outOk.value);
-      const b = document.getElementById('btnCopyOk');
-      b.textContent = 'Copied';
-      setTimeout(() => (b.textContent = 'Copy'), 1200);
-    });
+    function appendLog(time, msg, cls = 'info') {
+      const div = document.createElement('div');
+      div.innerHTML = `<span class="t">[${time}]</span> <span class="${cls}">${msg}</span>`;
+      logBox.appendChild(div);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
 
-    btnRun.addEventListener('click', async () => {
+    btnStart.addEventListener('click', async () => {
       outOk.value = '';
       outFail.value = '';
       logBox.innerHTML = '';
 
       let total = 0, ok = 0, fail = 0;
-      const syncUI = () => {
+      const updateStats = () => {
         document.getElementById('stTotal').textContent = total;
         document.getElementById('stOk').textContent = ok;
         document.getElementById('stFail').textContent = fail;
-        document.getElementById('cntOk').textContent = `${ok} accs`;
-        document.getElementById('cntFail').textContent = `${fail} accs`;
-        document.getElementById('progBar').style.width = total ? `${Math.round(((ok + fail) / total) * 100)}%` : '0%';
+        document.getElementById('pOk').textContent = `${ok} accs`;
+        document.getElementById('pFail').textContent = `${fail} accs`;
+        document.getElementById('barFill').style.width = total ? `${Math.round(((ok + fail) / total) * 100)}%` : '0%';
       };
-      syncUI();
+      updateStats();
 
-      btnRun.disabled = true;
-      btnRun.textContent = 'RUNNING...';
+      btnStart.disabled = true;
+      btnStart.textContent = 'RUNNING...';
 
       try {
-        const res = await fetch('/api/unlink', {
+        const res = await fetch('/api/unlinkmail', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            accounts: txtAcc.value,
-            proxies: txtProxy.value,
+            accounts: inAcc.value,
+            proxies: inProxy.value,
+            dobMode: document.getElementById('selDobMode').value,
             threads: document.getElementById('inpThreads').value,
-            retries: document.getElementById('inpRetries').value,
-            retryDelay: document.getElementById('inpDelay').value,
           }),
         });
 
@@ -528,31 +533,31 @@ btnCopyDiscord.addEventListener('click', async () => {
             const d = JSON.parse(ch.slice(6));
             if (d.type === 'start') {
               total = d.total;
-              syncUI();
+              updateStats();
             } else if (d.type === 'log') {
-              addLog(d.time, d.msg, d.level || 'INFO');
+              appendLog(d.time, d.msg, (d.level || 'INFO').toLowerCase());
             } else if (d.type === 'success') {
               ok++;
               outOk.value += (outOk.value ? '\n' : '') + d.line;
-              addLog(d.time, `${d.username} | ${d.msg}`, 'INFO');
-              syncUI();
+              appendLog(d.time, `OK · ${d.username}: ${d.msg}`, 'ok');
+              updateStats();
             } else if (d.type === 'fail') {
               fail++;
               outFail.value += (outFail.value ? '\n' : '') + d.line;
-              addLog(d.time, `${d.username} | ${d.msg}`, 'ERR');
-              syncUI();
+              appendLog(d.time, `FAIL · ${d.username}: ${d.msg}`, 'err');
+              updateStats();
             } else if (d.type === 'error') {
-              addLog(d.time, d.msg, 'ERR');
+              appendLog(d.time, d.msg, 'err');
             } else if (d.type === 'done') {
-              addLog(d.time, `Done: ${ok}/${total} success`, 'STEP');
+              appendLog(d.time, `DONE · ${ok}/${total} success`, 'ok');
             }
           }
         }
-      } catch (e) {
-        addLog('ERR', e.message, 'ERR');
+      } catch (err) {
+        appendLog('ERR', err.message, 'err');
       } finally {
-        btnRun.disabled = false;
-        btnRun.textContent = 'START UNLINK MAIL';
+        btnStart.disabled = false;
+        btnStart.textContent = 'START UNLINKMAIL';
       }
     });
   </script>
