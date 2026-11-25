@@ -336,7 +336,7 @@ def _short_err(resp: requests.Response) -> str:
     return txt[:120] if txt else f"HTTP {resp.status_code}"
    
 def _try_final_birthdate(session: requests.Session, csrf: str, b_month: int, b_day: int, b_year: int, rblx_challenge_id: str, final_meta_b64: str, orig_meta_b64: str):
-candidates = [
+    candidates = [
         {
             "rblx-challenge-id": rblx_challenge_id,
             "rblx-challenge-metadata": final_meta_b64,
@@ -353,7 +353,7 @@ candidates = [
             "rblx-challenge-metadata": orig_meta_b64,
             "rblx-challenge-type": "chef",
         },
-    ]    
+                 ]    
     last_resp = None
     cur_csrf = csrf
     for hdrs in candidates:
