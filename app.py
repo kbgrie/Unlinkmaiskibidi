@@ -331,6 +331,11 @@ def normalize_proxy(raw: str) -> str:
     return f"http://{raw}"
 
 
+def _short_err(resp: requests.Response) -> str:
+    txt = (resp.text or "").strip().replace("\n", " ")
+    return txt[:120] if txt else f"HTTP {resp.status_code}"
+
+
 def run_change_birthday(cookie: str, password: str, b_month: int, b_day: int, b_year: int, proxy_url: str = "", on_step=None):
     def step(msg):
         if on_step:
@@ -350,21 +355,26 @@ def run_change_birthday(cookie: str, password: str, b_month: int, b_day: int, b_
 
     step(f"[2/5] POST birthdate {b_month}/{b_day}/{b_year}")
     resp = post_birthdate(session, csrf, b_month, b_day, b_year)
-    if resp.status_code == 403 and "Token Validation Failed" in resp.text:
+    if resp.status_code == 403 and (
+        "token" in (resp.text or "").lower() or (resp.headers.get("x-csrf-token") and not resp.headers.get("rblx-challenge-type"))
+    ):
         csrf = resp.headers.get("x-csrf-token", csrf)
         resp = post_birthdate(session, csrf, b_month, b_day, b_year)
 
     if resp.status_code == 200:
         return True, f"Đổi thành công ({b_month}/{b_day}/{b_year})"
     if resp.status_code != 403:
-        return False, f"Lỗi HTTP {resp.status_code}"
+        return False, f"HTTP {resp.status_code}: {_short_err(resp)}"
 
-    challenge_type = resp.headers.get("rblx-challenge-type", "")
-    rblx_challenge_id = resp.headers.get("rblx-challenge-id", "")
-    challenge_metadata_b64 = resp.headers.get("rblx-challenge-metadata", "")
+    challenge_type = (resp.headers.get("rblx-challenge-type") or "").strip()
+    rblx_challenge_id = (resp.headers.get("rblx-challenge-id") or "").strip()
+    challenge_metadata_b64 = (resp.headers.get("rblx-challenge-metadata") or "").strip()
     new_csrf = resp.headers.get("x-csrf-token", "")
     if new_csrf:
         csrf = new_csrf
+
+    if not challenge_type:
+        return False, f"403 không có challenge ({_short_err(resp)})"
 
     if challenge_type != "chef":
         return False, f"Challenge không hỗ trợ: {challenge_type}"
@@ -441,7 +451,7 @@ def run_change_birthday(cookie: str, password: str, b_month: int, b_day: int, b_
             return True, f"Thành công sau retry ({b_month}/{b_day}/{b_year})"
         return False, f"Thất bại ({resp_retry.status_code})"
 
-    return False, f"Thất bại ({resp_final.status_code})"
+    return False, f"Thất bại ({resp_final.status_code}): {_short_err(resp_final)}"
 
 
 def parse_accounts(raw_text: str) -> list[tuple[str, str, str]]:
