@@ -334,6 +334,42 @@ def normalize_proxy(raw: str) -> str:
 def _short_err(resp: requests.Response) -> str:
     txt = (resp.text or "").strip().replace("\n", " ")
     return txt[:120] if txt else f"HTTP {resp.status_code}"
+   
+    def _try_final_birthdate(session: requests.Session, csrf: str, b_month: int, b_day: int, b_year: int, rblx_challenge_id: str, final_meta_b64: str, orig_meta_b64: str):
+    candidates = [
+        {
+            "rblx-challenge-id": rblx_challenge_id,
+            "rblx-challenge-metadata": final_meta_b64,
+            "rblx-challenge-type": "chef",
+            "x-retry-attempt": "1",
+        },
+        {
+            "rblx-challenge-id": rblx_challenge_id,
+            "rblx-challenge-metadata": final_meta_b64,
+            "rblx-challenge-type": "twostepverification",
+        },
+        {
+            "rblx-challenge-id": rblx_challenge_id,
+            "rblx-challenge-metadata": orig_meta_b64,
+            "rblx-challenge-type": "chef",
+        },
+    ]    
+    last_resp = None
+    cur_csrf = csrf
+    for hdrs in candidates:
+        resp = post_birthdate(session, cur_csrf, b_month, b_day, b_year, hdrs)
+        last_resp = resp
+        if resp.status_code == 200:
+            return True, resp
+        new_csrf = resp.headers.get("x-csrf-token", "")
+        if new_csrf and new_csrf != cur_csrf:
+            cur_csrf = new_csrf
+            resp2 = post_birthdate(session, cur_csrf, b_month, b_day, b_year, hdrs)
+            last_resp = resp2
+            if resp2.status_code == 200:
+                return True, resp2
+    return False, last_resp
+
 
 
 def run_change_birthday(cookie: str, password: str, b_month: int, b_day: int, b_year: int, proxy_url: str = "", on_step=None):
@@ -448,41 +484,6 @@ def run_change_birthday(cookie: str, password: str, b_month: int, b_day: int, b_
         return True, f"Thành công ({b_month}/{b_day}/{b_year})"
     return False, f"Thất bại ({resp_final.status_code if resp_final else 'ERR'}): {_short_err(resp_final) if resp_final else 'no resp'}"
    
-    def _try_final_birthdate(session: requests.Session, csrf: str, b_month: int, b_day: int, b_year: int, rblx_challenge_id: str, final_meta_b64: str, orig_meta_b64: str):
-    candidates = [
-        {
-            "rblx-challenge-id": rblx_challenge_id,
-            "rblx-challenge-metadata": final_meta_b64,
-            "rblx-challenge-type": "chef",
-            "x-retry-attempt": "1",
-        },
-        {
-            "rblx-challenge-id": rblx_challenge_id,
-            "rblx-challenge-metadata": final_meta_b64,
-            "rblx-challenge-type": "twostepverification",
-        },
-        {
-            "rblx-challenge-id": rblx_challenge_id,
-            "rblx-challenge-metadata": orig_meta_b64,
-            "rblx-challenge-type": "chef",
-        },
-    ]    
-    last_resp = None
-    cur_csrf = csrf
-    for hdrs in candidates:
-        resp = post_birthdate(session, cur_csrf, b_month, b_day, b_year, hdrs)
-        last_resp = resp
-        if resp.status_code == 200:
-            return True, resp
-        new_csrf = resp.headers.get("x-csrf-token", "")
-        if new_csrf and new_csrf != cur_csrf:
-            cur_csrf = new_csrf
-            resp2 = post_birthdate(session, cur_csrf, b_month, b_day, b_year, hdrs)
-            last_resp = resp2
-            if resp2.status_code == 200:
-                return True, resp2
-    return False, last_resp
-
 def parse_accounts(raw_text: str) -> list[tuple[str, str, str]]:
     out = []
     for line in raw_text.splitlines():
