@@ -1,0 +1,530 @@
+ <!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Ocean Unlink Mail — Roblox COPPA Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #041322;
+      --bg-ocean: #071e36;
+      --card: rgba(8, 31, 56, 0.82);
+      --input: #051629;
+      --border: rgba(56, 189, 248, 0.22);
+      --border-active: rgba(14, 165, 233, 0.72);
+      --sky: #38bdf8;
+      --ocean: #0284c7;
+      --cyan: #06b6d4;
+      --ok: #22c55e;
+      --warn: #facc15;
+      --err: #f87171;
+      --text: #e0f2fe;
+      --muted: #7dd3fc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(14, 165, 233, 0.24), transparent 38%),
+        radial-gradient(circle at 88% 85%, rgba(6, 182, 212, 0.18), transparent 40%),
+        linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-ocean) 100%);
+      padding: 16px;
+    }
+
+    @media (min-width: 768px) {
+      body { padding: 26px; }
+    }
+
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .topbar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      background: linear-gradient(135deg, var(--ocean), var(--cyan));
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(16px, 2.4vw, 22px);
+      font-weight: 700;
+      color: #f0f9ff;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .stats { width: auto; display: flex; gap: 10px; }
+    }
+
+    .stat {
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .stat span { font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+    .s-tot span { color: var(--sky); }
+    .s-ok span { color: var(--ok); }
+    .s-fail span { color: var(--err); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    @media (min-width: 1024px) {
+      .layout { grid-template-columns: 1fr 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--sky);
+    }
+
+    .meta-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--muted);
+      background: var(--input);
+      border: 1px solid var(--border);
+      padding: 3px 9px;
+      border-radius: 999px;
+    }
+
+    textarea {
+      width: 100%;
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #f0f9ff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 12px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea:focus {
+      border-color: var(--border-active);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18);
+    }
+
+    .opts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 520px) {
+      .opts { grid-template-columns: 1fr; }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field label {
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      padding: 9px 11px;
+      outline: none;
+    }
+
+    input[type="number"]:focus { border-color: var(--border-active); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button, .file-btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 10px 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+      min-height: 40px;
+    }
+
+    .btn-run {
+      background: linear-gradient(135deg, var(--ocean), var(--cyan));
+      color: #fff;
+      flex: 1 1 180px;
+      box-shadow: 0 4px 18px rgba(2, 132, 199, 0.35);
+    }
+
+    .btn-run:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn-run:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .btn-ghost, .file-btn {
+      background: var(--input);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover, .file-btn:hover { border-color: var(--sky); }
+
+    .btn-dl {
+      background: rgba(34, 197, 94, 0.14);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+
+    .btn-dl:hover { background: rgba(34, 197, 94, 0.24); }
+
+    .progress {
+      width: 100%;
+      height: 7px;
+      background: var(--input);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--ocean), var(--sky), var(--cyan));
+      transition: width 0.25s ease;
+    }
+
+    .log-box {
+      background: #030e1a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      height: 170px;
+      overflow-y: auto;
+      padding: 10px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      line-height: 1.55;
+    }
+
+    .t { color: #38bdf8; opacity: 0.75; }
+    .m-INFO { color: #e0f2fe; }
+    .m-STEP { color: #7dd3fc; }
+    .m-WARN { color: var(--warn); }
+    .m-ERR  { color: var(--err); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="title-group">
+        <span class="badge">OCEAN UNLINK</span>
+        <h1>ROBLOX UNLINK MAIL (&lt;13 DOB)</h1>
+      </div>
+      <div class="stats">
+        <div class="stat s-tot">TOTAL <span id="stTotal">0</span></div>
+        <div class="stat s-ok">SUCCESS <span id="stOk">0</span></div>
+        <div class="stat s-fail">FAILED <span id="stFail">0</span></div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Accounts (user:pass:cookie)</span>
+          <div class="meta-actions">
+            <span class="pill" id="cntAcc">0 accs</span>
+            <label class="file-btn" style="padding:5px 10px; min-height:auto; font-size:11.5px;">
+              Import .txt
+              <input type="file" id="fileAcc" accept=".txt" hidden />
+            </label>
+          </div>
+        </div>
+        <textarea id="txtAcc" rows="7" placeholder="username:password:_|WARNING:-DO-NOT-SHARE-THIS..."></textarea>
+
+        <div class="panel-head">
+          <span class="panel-title">Proxies (tùy chọn — user:pass@host:port hoặc host:port)</span>
+          <span class="pill" id="cntProxy">0 proxies</span>
+        </div>
+        <textarea id="txtProxy" rows="4" placeholder="user:pass@1.2.3.4:8080&#10;1.2.3.4:8080:user:pass"></textarea>
+
+        <div class="opts">
+          <div class="field">
+            <label>Threads (1–30)</label>
+            <input type="number" id="inpThreads" value="5" min="1" max="30" />
+          </div>
+          <div class="field">
+            <label>Retries (0–5)</label>
+            <input type="number" id="inpRetries" value="2" min="0" max="5" />
+          </div>
+          <div class="field">
+            <label>Retry Delay (s)</label>
+            <input type="number" id="inpDelay" value="2" min="0" max="15" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-run" id="btnRun">START UNLINK MAIL</button>
+          <button class="btn-ghost" id="btnClear">Clear</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-title" style="color:#86efac;">Unlink Success (user:pass:cookie)</span>
+          <span class="pill" id="cntOk">0 accs</span>
+        </div>
+        <textarea id="outOk" rows="6" readonly placeholder="Danh sách account unlink mail thành công..."></textarea>
+
+        <div class="actions">
+          <button class="btn-dl" id="btnDlOk">Download Success .txt</button>
+          <button class="btn-ghost" id="btnCopyOk">Copy</button>
+          <button class="btn-ghost" id="btnDlFail">Download Failed .txt</button>
+        </div>
+
+        <div class="panel-head">
+          <span class="panel-title" style="color:#fca5a5;">Failed / Dead</span>
+          <span class="pill" id="cntFail">0 accs</span>
+        </div>
+        <textarea id="outFail" rows="3" readonly placeholder="Account lỗi hoặc cookie chết..."></textarea>
+
+        <div class="progress">
+          <div class="progress-fill" id="progBar"></div>
+        </div>
+
+        <div class="log-box" id="logBox">
+          <div><span class="t">[READY]</span> <span class="m-STEP">Ocean Unlink Mail sẵn sàng trên Mobile &amp; PC.</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const txtAcc = document.getElementById('txtAcc');
+    const txtProxy = document.getElementById('txtProxy');
+    const outOk = document.getElementById('outOk');
+    const outFail = document.getElementById('outFail');
+    const logBox = document.getElementById('logBox');
+    const btnRun = document.getElementById('btnRun');
+
+    function updateCounts() {
+      const accs = txtAcc.value.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#') && l.split(':').length >= 3).length;
+      const prxs = txtProxy.value.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')).length;
+      document.getElementById('cntAcc').textContent = `${accs} accs`;
+      document.getElementById('cntProxy').textContent = `${prxs} proxies`;
+    }
+
+    txtAcc.addEventListener('input', updateCounts);
+    txtProxy.addEventListener('input', updateCounts);
+
+    document.getElementById('fileAcc').addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = (ev) => { txtAcc.value = ev.target.result; updateCounts(); };
+      r.readAsText(f);
+    });
+
+    document.getElementById('btnClear').addEventListener('click', () => {
+      txtAcc.value = '';
+      updateCounts();
+    });
+
+    function addLog(t, msg, level = 'INFO') {
+      const row = document.createElement('div');
+      row.innerHTML = `<span class="t">[${t}]</span> <span class="m-${level}">${msg}</span>`;
+      logBox.appendChild(row);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function saveFile(name, text) {
+      if (!text.trim()) return;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('btnDlOk').addEventListener('click', () => saveFile('unmail_success.txt', outOk.value));
+    document.getElementById('btnDlFail').addEventListener('click', () => saveFile('unmail_failed.txt', outFail.value));
+
+    document.getElementById('btnCopyOk').addEventListener('click', () => {
+      if (!outOk.value.trim()) return;
+      navigator.clipboard.writeText(outOk.value);
+      const b = document.getElementById('btnCopyOk');
+      b.textContent = 'Copied';
+      setTimeout(() => (b.textContent = 'Copy'), 1200);
+    });
+
+    btnRun.addEventListener('click', async () => {
+      outOk.value = '';
+      outFail.value = '';
+      logBox.innerHTML = '';
+
+      let total = 0, ok = 0, fail = 0;
+      const syncUI = () => {
+        document.getElementById('stTotal').textContent = total;
+        document.getElementById('stOk').textContent = ok;
+        document.getElementById('stFail').textContent = fail;
+        document.getElementById('cntOk').textContent = `${ok} accs`;
+        document.getElementById('cntFail').textContent = `${fail} accs`;
+        document.getElementById('progBar').style.width = total ? `${Math.round(((ok + fail) / total) * 100)}%` : '0%';
+      };
+      syncUI();
+
+      btnRun.disabled = true;
+      btnRun.textContent = 'RUNNING...';
+
+      try {
+        const res = await fetch('/api/unlink', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accounts: txtAcc.value,
+            proxies: txtProxy.value,
+            threads: document.getElementById('inpThreads').value,
+            retries: document.getElementById('inpRetries').value,
+            retryDelay: document.getElementById('inpDelay').value,
+          }),
+        });
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const chunks = buf.split('\n\n');
+          buf = chunks.pop();
+
+          for (const ch of chunks) {
+            if (!ch.startsWith('data: ')) continue;
+            const d = JSON.parse(ch.slice(6));
+            if (d.type === 'start') {
+              total = d.total;
+              syncUI();
+            } else if (d.type === 'log') {
+              addLog(d.time, d.msg, d.level || 'INFO');
+            } else if (d.type === 'success') {
+              ok++;
+              outOk.value += (outOk.value ? '\n' : '') + d.line;
+              addLog(d.time, `${d.username} | ${d.msg}`, 'INFO');
+              syncUI();
+            } else if (d.type === 'fail') {
+              fail++;
+              outFail.value += (outFail.value ? '\n' : '') + d.line;
+              addLog(d.time, `${d.username} | ${d.msg}`, 'ERR');
+              syncUI();
+            } else if (d.type === 'error') {
+              addLog(d.time, d.msg, 'ERR');
+            } else if (d.type === 'done') {
+              addLog(d.time, `Done: ${ok}/${total} success`, 'STEP');
+            }
+          }
+        }
+      } catch (e) {
+        addLog('ERR', e.message, 'ERR');
+      } finally {
+        btnRun.disabled = false;
+        btnRun.textContent = 'START UNLINK MAIL';
+      }
+    });
+  </script>
+</body>
+  </html>
