@@ -335,7 +335,7 @@ def _short_err(resp: requests.Response) -> str:
     txt = (resp.text or "").strip().replace("\n", " ")
     return txt[:120] if txt else f"HTTP {resp.status_code}"
    
-    def _try_final_birthdate(session: requests.Session, csrf: str, b_month: int, b_day: int, b_year: int, rblx_challenge_id: str, final_meta_b64: str, orig_meta_b64: str):
+def _try_final_birthdate(session: requests.Session, csrf: str, b_month: int, b_day: int, b_year: int, rblx_challenge_id: str, final_meta_b64: str, orig_meta_b64: str):
     candidates = [
         {
             "rblx-challenge-id": rblx_challenge_id,
