@@ -440,19 +440,13 @@ def run_change_birthday(cookie: str, password: str, b_month: int, b_day: int, b_
 
     step("[5/5] Xác nhận cập nhật birthdate")
     time.sleep(random.uniform(1.2, 2.2))
-    resp_final = post_birthdate(session, csrf, b_month, b_day, b_year, final_hdrs)
-    if resp_final.status_code == 200:
+    ok_final, resp_final = _try_final_birthdate(
+        session, csrf, b_month, b_day, b_year,
+        rblx_challenge_id, final_meta_b64, challenge_metadata_b64,
+    )
+    if ok_final:
         return True, f"Thành công ({b_month}/{b_day}/{b_year})"
-
-    retry_csrf = resp_final.headers.get("x-csrf-token", "")
-    if retry_csrf and retry_csrf != csrf:
-        resp_retry = post_birthdate(session, retry_csrf, b_month, b_day, b_year, final_hdrs)
-        if resp_retry.status_code == 200:
-            return True, f"Thành công sau retry ({b_month}/{b_day}/{b_year})"
-        return False, f"Thất bại ({resp_retry.status_code})"
-
-    return False, f"Thất bại ({resp_final.status_code}): {_short_err(resp_final)}"
-
+    return False, f"Thất bại ({resp_final.status_code if resp_final else 'ERR'}): {_short_err(resp_final) if resp_final else 'no resp'}"
 
 def parse_accounts(raw_text: str) -> list[tuple[str, str, str]]:
     out = []
