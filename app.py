@@ -29,7 +29,36 @@ def now_str() -> str:
     return datetime.now().strftime("%H:%M:%S")
 
 
-def produce_protected_payload(public_key_b64: str, payload: dict) -> dict:
+def _extract_script_params(decoded_js: str) -> tuple[str | None, str | None]:
+    sym_patterns = [
+        r'expectedSymbol\s*=\s*["\']([^"\']+)["\']',
+        r'symbolEntry\s*[:=]\s*["\']([^"\']+)["\']',
+        r'const\s+\w*Symbol\w*\s*=\s*["\']([^"\']+)["\']',
+    ]
+    key_patterns = [
+        r'produceProtectedPayload\s*\(\s*["\']([^"\']+)["\']',
+        r'publicKey\s*[:=]\s*["\']([^"\']+)["\']',
+        r'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A[A-Za-z0-9+/=]+',
+    ]
+
+    symbol = None
+    for pat in sym_patterns:
+        m = re.search(pat, decoded_js)
+        if m:
+            symbol = m.group(1) if m.lastindex else m.group(0)
+            break
+
+    pub_key = None
+    for pat in key_patterns:
+        m = re.search(pat, decoded_js)
+        if m:
+            pub_key = m.group(1) if m.lastindex else m.group(0)
+            break
+
+    return symbol, pub_key
+
+
+def _encrypt_payload(public_key_b64: str, payload: dict, hash_algo=hashes.SHA1) -> dict:
     aes_key = os.urandom(32)
     rsa_der = base64.b64decode(public_key_b64)
     public_key = serialization.load_der_public_key(rsa_der, backend=default_backend())
@@ -37,8 +66,8 @@ def produce_protected_payload(public_key_b64: str, payload: dict) -> dict:
     wrapped_key = public_key.encrypt(
         aes_key,
         asym_padding.OAEP(
-            mgf=asym_padding.MGF1(algorithm=hashes.SHA1()),
-            algorithm=hashes.SHA1(),
+            mgf=asym_padding.MGF1(algorithm=hash_algo()),
+            algorithm=hash_algo(),
             label=None,
         ),
     )
@@ -50,7 +79,7 @@ def produce_protected_payload(public_key_b64: str, payload: dict) -> dict:
         backend=default_backend(),
     ).encryptor()
 
-    plaintext = json.dumps(payload).encode("utf-8")
+    plaintext = json.dumps(payload, separators=(",", ":")).encode("utf-8")
     ciphertext = encryptor.update(plaintext) + encryptor.finalize() + encryptor.tag
 
     return {
@@ -60,95 +89,129 @@ def produce_protected_payload(public_key_b64: str, payload: dict) -> dict:
     }
 
 
-def solve_fingerprint(challenge_token: str, symbol_entry: str) -> dict:
-    fingerprint_data = {
-        "symbolEntry": symbol_entry,
-        "events": [
-            {
-                "audio": {"sampleHash": 1168.9068228197468, "oscillator": "sine", "maxChannels": 1, "channelCountMode": "max"},
-                "canvas": {"commonImageDataHash": "6999abd310347a74500b74b30bb97077"},
-                "fonts": {
-                    "Arial Black": 531.9140625, "Calibri": 420.046875, "Candara": 435.4453125,
-                    "Comic Sans MS": 462.4453125, "Constantia": 469.86328125, "Courier": 432.0703125,
-                    "Courier New": 432.0703125, "Franklin Gothic Medium": 431.82421875,
-                    "Georgia": 475.2421875, "Impact": 395.54296875, "Lucida Console": 433.828125,
-                    "Lucida Sans Unicode": 472.0078125, "Segoe Print": 514.30078125,
-                    "Segoe Script": 525.234375, "Segoe UI": 450, "Tahoma": 432.45703125,
-                    "Trebuchet MS": 428.90625, "Verdana": 486.5625,
-                },
-                "hardware": {
-                    "videocard": {
-                        "vendor": "WebKit",
-                        "renderer": "WebKit WebGL",
-                        "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
-                        "shadingLanguageVersion": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)",
-                    },
-                    "architecture": 255,
-                    "deviceMemory": "8",
-                    "jsHeapSizeLimit": 4294705152,
-                },
-                "locales": {"languages": "en-US", "timezone": "America/Chicago"},
-                "permissions": {
-                    "accelerometer": "granted", "backgroundFetch": "granted", "backgroundSync": "granted",
-                    "camera": "prompt", "clipboardRead": "prompt", "clipboardWrite": "granted",
-                    "displayCapture": "prompt", "gyroscope": "granted", "geolocation": "prompt",
-                    "localFonts": "prompt", "magnetometer": "granted", "microphone": "prompt",
-                    "midi": "prompt", "notifications": "prompt", "paymentHandler": "granted",
-                    "persistentStorage": "prompt", "storageAccess": "granted", "windowManagement": "prompt",
-                },
-                "plugins": {
-                    "plugins": [
-                        "PDF Viewer|internal-pdf-viewer|Portable Document Format",
-                        "Chrome PDF Viewer|internal-pdf-viewer|Portable Document Format",
-                        "Chromium PDF Viewer|internal-pdf-viewer|Portable Document Format",
-                        "Microsoft Edge PDF Viewer|internal-pdf-viewer|Portable Document Format",
-                        "WebKit built-in PDF|internal-pdf-viewer|Portable Document Format",
-                    ]
-                },
-                "screen": {
-                    "is_touchscreen": False,
-                    "maxTouchPoints": 0,
-                    "colorDepth": 24,
-                    "mediaMatches": [
-                        "prefers-contrast: no-preference", "any-hover: hover", "any-pointer: fine",
-                        "pointer: fine", "hover: hover", "update: fast",
-                        "prefers-reduced-motion: no-preference", "prefers-reduced-transparency: no-preference",
-                        "scripting: enabled", "forced-colors: none",
-                    ],
-                },
-                "system": {
-                    "platform": "Win32",
-                    "cookieEnabled": True,
-                    "productSub": "20030107",
-                    "product": "Gecko",
-                    "useragent": USER_AGENT,
-                    "hardwareConcurrency": 12,
-                    "browser": {"name": "Chrome", "version": "145.0"},
-                    "applePayVersion": 0,
-                },
-                "webgl": {"commonImageHash": "3a4ed1c6378f68583893dd719f84f6c9"},
-                "math": {
-                    "acos": 1.0471975511965979, "asin": -9.614302481290016e-17,
-                    "atan": 4.578239276804769e-17, "cos": -4.854249971455313e-16,
-                    "cosh": 1.9468519159297506, "e": 2.718281828459045,
-                    "largeCos": 0.7639704044417283, "largeSin": -0.6452512852657808,
-                    "largeTan": -0.8446024630198843, "log": 6.907755278982137,
-                    "pi": 3.141592653589793, "sin": -1.9461946644816207e-16,
-                    "sinh": -0.6288121810679035, "sqrt": 1.4142135623730951,
-                    "tan": 6.980860926542689e-14, "tanh": -0.39008295789884684,
-                },
-                "data_latency_ms": 156.9,
-            }
-        ],
-        "metrics": [],
+def solve_chef_challenge_v2(
+    session: requests.Session,
+    csrf: str,
+    rblx_challenge_id: str,
+    identifiers: list,
+    user_id: str,
+    btid: str,
+) -> tuple[bool, str]:
+    if not identifiers:
+        return False, "No scriptIdentifiers in metadata"
+
+    headers_fetch = {
+        "User-Agent": USER_AGENT,
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.roblox.com/",
+        "Origin": "https://www.roblox.com",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site",
     }
 
-    f_payload = {
-        "symbolEntry": symbol_entry,
-        "events": [json.dumps(fingerprint_data)],
-        "metrics": [],
+    headers_submit = {
+        "User-Agent": USER_AGENT,
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.roblox.com/",
+        "Content-Type": "application/json-patch+json",
+        "x-csrf-token": csrf,
+        "Origin": "https://www.roblox.com",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site",
     }
-    return produce_protected_payload(challenge_token, f_payload)
+
+    submitted_any = False
+
+    for idx, ident in enumerate(identifiers):
+        resp = session.get(
+            "https://apis.roblox.com/rotating-client-service/v1/fetch",
+            params={"challengeId": rblx_challenge_id, "identifier": ident},
+            headers=headers_fetch,
+            timeout=20,
+        )
+        if resp.status_code != 200:
+            return False, f"Fetch #{idx + 1} failed ({resp.status_code})"
+
+        raw_txt = resp.text.strip()
+        try:
+            decoded_js = base64.b64decode(raw_txt).decode("utf-8", errors="ignore")
+        except Exception:
+            decoded_js = raw_txt
+
+        symbol_entry, pub_key_b64 = _extract_script_params(decoded_js)
+        if not symbol_entry or not pub_key_b64:
+            return False, f"Script #{idx + 1} mismatch (sym={bool(symbol_entry)}, key={bool(pub_key_b64)})"
+
+        fp_event = {
+            "symbolEntry": symbol_entry,
+            "events": [
+                {
+                    "system": {
+                        "platform": "Win32",
+                        "cookieEnabled": True,
+                        "useragent": USER_AGENT,
+                        "hardwareConcurrency": 12,
+                        "browser": {"name": "Chrome", "version": "145.0"},
+                    },
+                    "locales": {"languages": "en-US", "timezone": "UTC"},
+                    "screen": {"is_touchscreen": False, "maxTouchPoints": 0, "colorDepth": 24},
+                    "data_latency_ms": round(random.uniform(90, 220), 2),
+                }
+            ],
+            "metrics": [],
+        }
+
+        f_payload = {
+            "symbolEntry": symbol_entry,
+            "events": [json.dumps(fp_event, separators=(",", ":"))],
+            "metrics": [],
+        }
+
+        try:
+            enc = _encrypt_payload(pub_key_b64, f_payload, hashes.SHA1)
+        except Exception:
+            try:
+                enc = _encrypt_payload(pub_key_b64, f_payload, hashes.SHA256)
+            except Exception as e:
+                return False, f"Encrypt error: {e}"
+
+        submit_body = {
+            "userId": str(user_id),
+            "challengeId": rblx_challenge_id,
+            "payloadV2": enc["eventPayload"],
+            "params": {
+                "key": enc["data"],
+                "iv": enc["ivBase64Enc"],
+            },
+            "btid": str(btid),
+        }
+
+        r_sub = session.post(
+            "https://apis.roblox.com/rotating-client-service/v1/submit",
+            headers=headers_submit,
+            data=json.dumps(submit_body, separators=(",", ":")),
+            timeout=20,
+        )
+        if r_sub.status_code == 403 and r_sub.headers.get("x-csrf-token"):
+            headers_submit["x-csrf-token"] = r_sub.headers["x-csrf-token"]
+            r_sub = session.post(
+                "https://apis.roblox.com/rotating-client-service/v1/submit",
+                headers=headers_submit,
+                data=json.dumps(submit_body, separators=(",", ":")),
+                timeout=20,
+            )
+
+        if r_sub.status_code not in (200, 204):
+            return False, f"Submit #{idx + 1} failed ({r_sub.status_code})"
+
+        submitted_any = True
+        time.sleep(0.15)
+
+    return submitted_any, "Chef submitted"
 
 
 def get_base_headers(csrf: str = "") -> dict:
@@ -206,63 +269,6 @@ def post_birthdate(session: requests.Session, csrf: str, b_month: int, b_day: in
     return session.post("https://users.roblox.com/v1/birthdate", headers=headers, data=body_json, timeout=25)
 
 
-def solve_chef_challenge_sync(session: requests.Session, csrf: str, rblx_challenge_id: str, identifiers: list, user_id: str, btid: str) -> bool:
-    headers_fetch = {
-        "User-Agent": USER_AGENT,
-        "Accept": "*/*",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate, br, zstd",
-        "Referer": "https://www.roblox.com/",
-        "Origin": "https://www.roblox.com",
-        "Connection": "keep-alive",
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-site",
-    }
-
-    resp1 = session.get(
-        f"https://apis.roblox.com/rotating-client-service/v1/fetch?challengeId={rblx_challenge_id}&identifier={identifiers[0]}",
-        headers=headers_fetch,
-        timeout=20,
-    )
-    data1 = base64.b64decode(resp1.text).decode()
-    tok1 = re.search(r'produceProtectedPayload\s*\(\s*"([^"]+)"', data1).group(1)
-    sym1 = re.search(r'expectedSymbol="([^"]+)"', data1).group(1)
-    s1 = solve_fingerprint(tok1, sym1)
-
-    resp2 = session.get(
-        f"https://apis.roblox.com/rotating-client-service/v1/fetch?challengeId={rblx_challenge_id}&identifier={identifiers[1]}",
-        headers=headers_fetch,
-        timeout=20,
-    )
-    data2 = base64.b64decode(resp2.text).decode()
-    tok2 = re.search(r'produceProtectedPayload\s*\(\s*"([^"]+)"', data2).group(1)
-    sym2 = re.search(r'expectedSymbol="([^"]+)"', data2).group(1)
-    s2 = solve_fingerprint(tok2, sym2)
-
-    headers_submit = {
-        "User-Agent": USER_AGENT,
-        "Accept": "*/*",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate, br, zstd",
-        "Referer": "https://www.roblox.com/",
-        "Content-Type": "application/json-patch+json",
-        "x-csrf-token": csrf,
-        "Origin": "https://www.roblox.com",
-        "Connection": "keep-alive",
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-site",
-    }
-
-    p1 = {"userId": str(user_id), "challengeId": rblx_challenge_id, "payloadV2": s1["eventPayload"], "params": {"key": s1["data"], "iv": s1["ivBase64Enc"]}, "btid": str(btid)}
-    p2 = {"userId": str(user_id), "challengeId": rblx_challenge_id, "payloadV2": s2["eventPayload"], "params": {"key": s2["data"], "iv": s2["ivBase64Enc"]}, "btid": str(btid)}
-
-    r1 = session.post("https://apis.roblox.com/rotating-client-service/v1/submit", headers=headers_submit, data=json.dumps(p1, separators=(",", ":")), timeout=20)
-    r2 = session.post("https://apis.roblox.com/rotating-client-service/v1/submit", headers=headers_submit, data=json.dumps(p2, separators=(",", ":")), timeout=20)
-    return r1.status_code == 200 and r2.status_code == 200
-
-
 def continue_challenge(session: requests.Session, csrf: str, rblx_challenge_id: str, challenge_type: str, challenge_metadata: dict):
     headers = get_base_headers(csrf)
     payload = {
@@ -288,7 +294,6 @@ def verify_password_2sv(session: requests.Session, csrf: str, user_id: str, chal
 
 
 def get_unlink_birthdate() -> tuple[int, int, int]:
-    """Ngày sinh < 13 tuổi để trigger COPPA unlink mail."""
     today = date.today()
     dob = today.replace(year=today.year - 13) + timedelta(days=1)
     return dob.month, dob.day, dob.year
@@ -366,12 +371,11 @@ def run_change_birthday(cookie: str, password: str, b_month: int, b_day: int, b_
 
     meta = json.loads(base64.b64decode(challenge_metadata_b64).decode("utf-8"))
     identifiers = meta.get("scriptIdentifiers", [])
-    if len(identifiers) < 2:
-        return False, "Thiếu Chef script identifiers"
 
-    step("[3/5] Giải Chef challenge")
-    if not solve_chef_challenge_sync(session, csrf, rblx_challenge_id, identifiers, user_id, btid):
-        return False, "Chef challenge thất bại"
+    step("[3/5] Giải Chef challenge v2")
+    chef_ok, chef_msg = solve_chef_challenge_v2(session, csrf, rblx_challenge_id, identifiers, user_id, btid)
+    if not chef_ok:
+        return False, chef_msg
 
     time.sleep(random.uniform(0.8, 1.6))
     step("[4/5] Continue & verify 2SV password")
